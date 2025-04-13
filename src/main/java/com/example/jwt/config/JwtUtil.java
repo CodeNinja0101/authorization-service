@@ -10,6 +10,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 @Component
@@ -19,6 +20,11 @@ public class JwtUtil {
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public Set<String> extractRoles(String token) {
+        Claims claims = extractAllClaims(token);
+        return Set.of(((String) claims.get("roles")).split(","));
     }
 
     public Date extractExpiration(String token) {
@@ -42,8 +48,9 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, Set<String> roles) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", roles != null && !roles.isEmpty() ? String.join(",", roles) : "");
         return createToken(claims, username);
     }
 
