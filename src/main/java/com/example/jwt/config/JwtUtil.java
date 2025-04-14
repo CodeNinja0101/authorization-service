@@ -24,7 +24,8 @@ public class JwtUtil {
 
     public Set<String> extractRoles(String token) {
         Claims claims = extractAllClaims(token);
-        return Set.of(((String) claims.get("roles")).split(","));
+        String roles = (String) claims.get("roles");
+        return roles != null && !roles.isEmpty() ? Set.of(roles.split(",")) : Set.of();
     }
 
     public Date extractExpiration(String token) {
@@ -59,7 +60,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10)) // 10 minutes
                 .signWith(SECRET_KEY)
                 .compact();
     }
