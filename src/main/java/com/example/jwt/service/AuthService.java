@@ -2,6 +2,7 @@ package com.example.jwt.service;
 
 import com.example.jwt.config.JwtUtil;
 import com.example.jwt.dto.AuthRequest;
+import com.example.jwt.entity.RefreshToken;
 import com.example.jwt.entity.User;
 import com.example.jwt.exception.InvalidCredentialsException;
 import com.example.jwt.exception.UserNotFoundException;
@@ -12,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -48,7 +51,7 @@ public class AuthService {
         log.info("User '{}' registered successfully", authRequest.getUsername());
     }
 
-    public String login(AuthRequest authRequest) {
+    public Map<String, String> login(AuthRequest authRequest) {
         log.info("Login attempt for username: {}", authRequest.getUsername());
         User user = userRepository.findByUsername(authRequest.getUsername())
                 .orElseThrow(() -> {
@@ -66,8 +69,12 @@ public class AuthService {
             roles.add("ROLE_USER");
         }
 
-        String token = jwtUtil.generateToken(user.getUsername(), roles);
-        log.info("Token generated for user '{}'", user.getUsername());
-        return token;
+        String accessToken = jwtUtil.generateToken(user.getUsername(), roles);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("accessToken", accessToken);
+        tokens.put("refreshToken", refreshToken.getToken());
+        log.info("Tokens generated for user '{}'", user.getUsername());
+        return tokens;
     }
 }

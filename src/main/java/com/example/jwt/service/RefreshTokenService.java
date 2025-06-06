@@ -18,7 +18,7 @@ public class RefreshTokenService {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    public RefreshToken createrefreshToken(String username) {
+    public RefreshToken createRefreshToken(String username) {
         refreshTokenRepository.deleteByUsername(username);
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUsername(username);
